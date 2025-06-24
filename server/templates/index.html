@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Скачать с YouTube</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="container">
+    <h1>Скачать видео или аудио с YouTube</h1>
+    <form method="post" onsubmit="return startDownload()">
+      <input type="text" name="url" placeholder="Вставьте ссылку на видео" required size="60"><br><br>
+      <label><input type="radio" name="format" value="mp4" checked> MP4 (видео)</label>
+      <label><input type="radio" name="format" value="mp3"> MP3 (аудио)</label><br><br>
+      <input type="hidden" name="uuid_" id="uuid_">
+      <button type="submit" id="submit-button">Скачать</button>
+    </form>
+
+    <div id="info-area" style="display:none; margin-top: 15px;">
+      <div><strong>Название:</strong> <span id="video-title"></span></div>
+      <div><strong>Прогресс:</strong> <span id="progress-text">0%</span></div>
+      <div><strong>Осталось:</strong> <span id="eta-text">—</span></div>
+    </div>
+
+    <div id="progress-container">
+      <div id="bar"><div id="fill"></div></div>
+    </div>
+
+    <div id="done-message" style="display: none; margin-top: 15px; text-align: center;">
+      <div style="font-size: 40px; color: green;">✔️</div>
+      <div style="font-weight: bold;">Готово!</div>
+    </div>
+
+    <div id="again-button" style="display: none; text-align: center; margin-top: 15px;">
+      <a href="/" style="padding: 10px 20px; background: #0078d7; color: white; border-radius: 4px; text-decoration: none;">Скачать ещё</a>
+    </div>
+
+    {% if message %}
+      <p class="message">{{ message }}</p>
+    {% endif %}
+
+    <audio id="ding-sound" preload="auto">
+      <source src="/static/ding.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <script>
+    function generateUUID() {
+      return Math.random().toString(36).substring(2, 10);
+    }
+
+    const uuid = generateUUID();
+    document.getElementById("uuid_").value = uuid;
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec.toString().padStart(2, "0")}`;
+    }
+
+    function startDownload() {
+      document.getElementById("submit-button").style.display = "none";
+      document.getElementById("info-area").style.display = "block";
+
+      const source = new EventSource(`/progress/${uuid}`);
+      const fill = document.getElementById("fill");
+      const done = document.getElementById("done-message");
+      const sound = document.getElementById("ding-sound");
+      const againButton = document.getElementById("again-button");
+      const progressText = document.getElementById("progress-text");
+      const etaText = document.getElementById("eta-text");
+      const titleEl = document.getElementById("video-title");
+
+      let lastUpdate = Date.now();
+      let lastPercent = 0;
+
+      source.onmessage = function(event) {
+        const data = event.data;
+
+        // Если сервер шлёт в формате "название || процент || ETA", парсим
+        if (data.includes("||")) {
+          const [title, percentStr, etaStr] = data.split("||");
+          const percent = parseFloat(percentStr.trim());
+          fill.style.width = percent + "%";
+          progressText.textContent = percent + "%";
+          etaText.textContent = etaStr.trim();
+          titleEl.textContent = title.trim();
+        } else {
+          const percent = parseFloat(data);
+          fill.style.width = percent + "%";
+          progressText.textContent = percent + "%";
+        }
+
+        if (parseFloat(data.split("||")[1] || data) >= 100) {
+          source.close();
+          done.style.display = "block";
+          againButton.style.display = "block";
+          document.getElementById("progress-container").classList.add("fade-out");
+          try {
+            sound.play();
+          } catch (e) {
+            console.warn("🔇 Ошибка воспроизведения звука:", e);
+          }
+        }
+      };
+
+      return true;
+    }
+  </script>
+  <div style="text-align:center; margin-top: 30px; font-size: 14px;">
+    <a href="https://www.linkedin.com/in/panamarchuk/" target="_blank" style="color: #0078d7; text-decoration: none;">
+        Моя страница в соцсетях
+    </a>
+  </div>
+</body>
+</html>
