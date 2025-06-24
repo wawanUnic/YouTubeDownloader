@@ -1,6 +1,6 @@
 # YouTubeDownloader
 
-## The setup is done for the machine
+## Setting up for the machine
 
 - OS: Ubuntu 24.04.2 LTS
 - Platform: x86_64
@@ -9,18 +9,18 @@
 - Storage: SSD 120GB
 
 ## Ports used (server):
-- 22 - SSH - управление сервером. Вход только по ключу
+- 22 - SSH - server management. Login only by key
 - 2468 - YouTubeDownloader (web)
 
 ## Ports used (balancer):
-- 22 - SSH - управление сервером. Вход только по ключу
-- 80 - HHTP - веб-интерфейс (витрина). Возвращает постоянное перенаправление на HTTPs
-- 443 - HTTPs - веб-интерфейс (витрина).
+- 22 - SSH - balancer control. Login only by key
+- 80 - HHTP - web interface (web). Returns permanent redirect to HTTPs
+- 443 - HTTPs - web interface (web).
 
-## Добавим нового пользователя
-Работаем от root
+## Add a new user
+Working as root
 
-Пользователь name:password
+User name:password
 
 ```
 adduser name
@@ -30,8 +30,8 @@ sudo ls -la /root
 sudo reboot
 ```
 
-## Создадим ключи для SSH
-Работаем от root
+## Create keys for SSH
+Working as root
 
 ```
 ssh-keygen
@@ -41,23 +41,23 @@ nano id_rsa
 mv id_rsa.pub authorized_keys
 chmod 644 authorized_keys
 ```
-Скопируем содержимое закрытого ключа из консоли и сохраним его в пустом формате на ПК с помощью текстового редактора
-
-Имя файла не критично. Важно: приватный ключ должен содержать:
------НАЧНИТЕ ОТКРЫВАТЬ ЗАКРЫТЫЙ КЛЮЧ OPENSSH----- ... -----END OPENSSH ПРИВАТНЫЙ КЛЮЧ-----
-
-Публичный ключ скопируем всем пользователям в папку .ssh
-
-Права 644 нужно сделать у всех пользователей
-
-В Windows загрузим PuTTYgen. В меню: нажмите Conversions->Import key и найдем сохраненный файл закрытого ключа
-Он загрузится в программу. Нажмем «Сохранить закрытый ключ» в формате PuTTY .ppk в D:\Program Files\PuTTY\KEYs
-Загрузим файл .ppk в свой профиль SSH уже в программе PuTTY: Connection->SSH->Auth->Credentials
+Copy the contents of the private key from the console and save it in an empty format on your PC using a text editor.
+The file name is not critical. Important: the private key must contain:
+```
+-----START OPENSH PRIVATE KEY-----
+...
+-----END OPENSSH ПРИВАТНЫЙ КЛЮЧ-----
+```
+Copy the public key to all users in the .ssh folder.
+You need to set 644 rights for all users.
+In Windows, load PuTTYgen. In the menu: click Conversions->Import key and find the saved private key file.
+It will load into the program. Click "Save private key" in PuTTY .ppk format in D:\Program Files\PuTTY\KEYs.
+Load the .ppk file into your SSH profile in the PuTTY program: Connection->SSH->Auth->Credentials
 Connection - keepAlive 15 sec
-Сохраним свой профиль в PuTTY
+Saving your profile in PuTTY
 
-## Запретим на вход по паролю
-Работаем от root
+## We prohibit login by password
+We work as root
 
 nano /etc/ssh/sshd_config:
 ```
@@ -66,8 +66,8 @@ PasswordAuthentication no
 ```
 service ssh restart
 
-## Обновим систему
-Работаем от name
+## We will update the system
+We work from name
 ```
 sudo apt update
 sudo apt upgrade
@@ -77,65 +77,69 @@ sudo apt install python3.12-venv
 sudo apt-get install ffmpeg
 ```
 
-## Копируем исходные файлы
-Работаем от name
+## Copying source files
+Working from name
 
-Создаем папку ogg2mpeg. Копируем в неё исходные файлы
+Create a youtubedownloader folder. Copy the source files into it.
 
-Даем права на исполнение (!!! Дать папке /home/name права на R+X other, командой chmod o+rX /home/name):
+Give execution rights (!!! Give the /home/name folder rights to R+X other, with the chmod o+rX /home/name command):
 ```
 find ogg2mpeg/ -type f -exec chmod 755 {} \;
 ```
 
-## Создаем виртуальное окружение
-Работаем от name
+## Create a virtual environment
+Working from name
 
-Версии добавленных пакетов:
+Versions of added packages:
 ```
 annotated-types   0.7.0
-anyio             4.8.0
-click             8.1.8
-fastapi           0.115.7
-h11               0.14.0
+anyio             4.9.0
+click             8.2.1
+fastapi           0.115.13
+h11               0.16.0
 idna              3.10
+Jinja2            3.1.6
+MarkupSafe        3.0.2
 pip               24.0
-pydantic          2.10.6
-pydantic_core     2.27.2
-pydub             0.25.1
+pydantic          2.11.7
+pydantic_core     2.33.2
 python-multipart  0.0.20
 sniffio           1.3.1
-starlette         0.45.3
-typing_extensions 4.12.2
-uvicorn           0.34.0
+starlette         0.46.2
+typing_extensions 4.14.0
+typing-inspection 0.4.1
+uvicorn           0.34.3
+yt-dlp            2025.6.9
 ```
 
 ```
-cd /home/pi/ogg2mpeg
+cd /home/name/youtubedownloader
 python3 -m venv myenv
 source myenv/bin/activate
-pip install fastapi uvicorn pydub python-multipart
+pip install fastapi uvicorn jinja2 yt-dlp python-multipart
 pip list
-python main.py -- Эту команду не запускать! Это только для ручного тестирования
+python app.py -- Do not run this command! This is for manual testing only.
 ```
 
-## Добавляем сервисы в systemD
-Работаем от name
+## Adding services to systemD
+Working from name
 
-Для простого испытания достаточно - python3 main.py
+For a simple test it is enough - python3 app.py
 
-sudo nano /etc/systemd/system/ogg2mpeg.service (python3.12?):
+sudo nano /etc/systemd/system/youtubedownloader.service (python3.12?):
 ```
 [Unit]
-Description=ogg2mpeg
+Description=youtubedownloader
 After=network-online.target nss-user-lookup.target
 
 [Service]
 User=name
 Group=name
-WorkingDirectory=/home/pi/ogg2mpeg
-Environment="PYTHONPATH=/home/pi/ogg2mpeg/myenv/lib/python3.12/site-packages"
+WorkingDirectory=/home/name/youtubedownloader
+Environment="PYTHONPATH=/home/name/youtubedownloader/myenv/lib/python3.12/site-packages"
 ExecStartPre=/usr/bin/sleep 10
-ExecStart=/home/pi/ogg2mpeg/myenv/bin/python3.12 /home/pi/ogg2mpeg/main.py
+ExecStart=/home/name/youtubedownloader/myenv/bin/python3.12 /home/name/youtubedownloader/app.py
+??? ExecStart=/home/name/youtubedownloader/uvicorn app:app --reload --host 0.0.0.0 --port 2468 ???
 
 RestartSec=10
 Restart=always
@@ -146,10 +150,10 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Настраивам systemD:
+Configure systemD:
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable --now ogg2mpeg.service
-systemctl status ogg2mpeg.service
+sudo systemctl enable --now youtubedownloader.service
+systemctl status youtubedownloader.service
 ```
 
