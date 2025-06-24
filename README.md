@@ -4,17 +4,16 @@
 
 ## Setting up for the machine
 
-- OS: Ubuntu 24.04.2 LTS
-- Platform: x86_64
-- Processor: Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz (4 cores)
-- RAM: 32GB DDR4 2133 MHz
+- Processor / Memory: Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz (4 cores) / 32GB DDR4 2133 MHz
+- OS / Platform: Ubuntu 24.04.2 LTS / x86_64
 - Storage: SSD 120GB
 
 ## Setting up for the balancer
 
-- Processor / Memory - VIA Eden Processor 1000MHz (32bit) / 0.5GB DDR2
+- Processor / Memory - VIA Eden Processor 1000MHz (32bit) / 2GB DDR2
 - AlpineLinux version / Linux kernel version - 3.21.3 / 6.12.13-0-lts
 - HAProxy version 3.0.9-7f0031e 2025/03/20
+- Storage: SSD 4GB
 
 ## Ports used (server):
 - 22 - SSH - server management. Login only by key
@@ -23,14 +22,14 @@
 ## Ports used (balancer):
 - 22 - SSH - balancer control. Login only by key
 - 80 - HHTP - web interface. Returns permanent redirect to HTTPs
-- 443 - HTTPs - web interface.
-- 8404/stats - HTTP - statistics
+- 443 - HTTPs - web interface. HaProxy
+- 444 - HTTPs - Alpine Configuration Framework
+- 8404/stats - HTTP - HaProxy statistics
 
 ## Add a new user
 Working as root
 
 User name:password
-
 ```
 adduser name
 usermod -aG sudo name
