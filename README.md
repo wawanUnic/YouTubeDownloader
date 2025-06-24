@@ -232,24 +232,12 @@ frontend http_front
 frontend https_front
     bind *:443 ssl crt /etc/haproxy/certs/
     acl host_site1 hdr(host) -i nero-dozzle.duckdns.org
-    acl host_site2 hdr(host) -i nero-supabase.duckdns.org
-    acl host_site3 hdr(host) -i nero-n8n.duckdns.org
-    acl host_site4 hdr(host) -i nero-flowise.duckdns.org
     use_backend dozzle if host_site1
-    use_backend supabase if host_site2
-    use_backend n8n if host_site3
-    use_backend flowise if host_site4
     default_backend backend_default
 backend letsencrypt-backend
     server certbot 127.0.0.1:1111
 backend dozzle
     server server12:8088 192.168.4.117:8088 check
-backend supabase
-    server server12:8000 192.168.4.117:8000 check
-backend n8n
-    server server12:5678 192.168.4.117:5678 check
-backend flowise
-    server server12:3000 192.168.4.117:3000 check
 backend backend_default
     errorfile 503 /etc/haproxy/errors/503.http
 listen stats
@@ -268,7 +256,7 @@ haproxy -c -f /etc/haproxy/haproxy.cfg
 rc-service haproxy reload
 ```
 
-## Создаем первичный сертификат для первого домена getFirstDozzle.sh (нужно создать папку для объедененного сертификата - mkdir /etc/haproxy/certs)
+## Создаем первичный сертификат для домена getFirstDozzle.sh (нужно создать папку для объедененного сертификата - mkdir /etc/haproxy/certs)
 ```
 #!/bin/sh
 cat /etc/letsencrypt/live/nero-dozzle.duckdns.org/fullchain.pem /etc/letsencrypt/live/nero-dozzle.duckdns.org/privkey.pem > /etc/haproxy/certs/nero-dozzle.duckdns.org.pem
@@ -278,13 +266,7 @@ rc-service haproxy reload
 ## Создаем сертификаты
 ```
 chmod +x /root/getFirstDozzle.sh
-chmod +x /root/getFirstN8N.sh
-chmod +x /root/getFirstSupabase.sh
-chmod +x /root/getFirstFlowise.sh
 certbot certonly --standalone --http-01-port 1111 -d nero-dozzle.duckdns.org --post-hook "/root/getFirstDozzle.sh"
-certbot certonly --standalone --http-01-port 1111 -d nero-n8n.duckdns.org --post-hook "/root/getFirstN8N.sh"
-certbot certonly --standalone --http-01-port 1111 -d nero-supabase.duckdns.org --post-hook "/root/getFirstSupabase.sh"
-certbot certonly --standalone --http-01-port 1111 -d nero-flowise.duckdns.org --post-hook "/root/getFirstFlowise.sh"
 ```
 
 ## Создаем скрипт для автоматического перевыпуска всех сертификатов autoCertBot.sh (и делаем его исполняемым chmod +x /root/autoCertBot.sh)
