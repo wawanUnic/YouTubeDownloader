@@ -1,7 +1,5 @@
 # YouTubeDownloader
 
-# Setting up the server (192.168.8.202)
-
 ## Setting up for the server
 
 - Processor / Memory: Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz (4 cores) / 32GB DDR4 2133 MHz
@@ -25,6 +23,8 @@
 - 443 - HTTPs - web interface. HaProxy
 - 444 - HTTPs - Alpine Configuration Framework
 - 8404/stats - HTTP - HaProxy statistics
+
+# Setting up the server (192.168.8.202)
 
 ## Add a new user
 Working as root
@@ -166,6 +166,7 @@ systemctl status youtubedownloader.service
 ```
 
 # Setting up a balancer (78.10.22.114 - 192.168.8.201)
+
 The setting is made for the domain:
 ```
 youtubedownloader.by
