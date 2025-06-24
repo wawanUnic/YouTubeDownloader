@@ -1,5 +1,7 @@
 # YouTubeDownloader
 
+# Настройка сервера
+
 ## Setting up for the machine
 
 - OS: Ubuntu 24.04.2 LTS
@@ -163,12 +165,13 @@ sudo systemctl enable --now youtubedownloader.service
 systemctl status youtubedownloader.service
 ```
 
-Настройка производится для доменов:
+# Настройка балансировщика
+The setting is made for the domain:
 ```
 youtubedownloader.by
 ```
 
-## Впишем новые репозитории для обновления пакетов
+## Added new repositories for updating packages
 ```
 vi /etc/apk/repositories
 	I
@@ -178,18 +181,18 @@ vi /etc/apk/repositories
 	:wq
  ```
 
-## Обновим систему
+## We will update the system
 ```
 apk update
 apk upgrade
 ```
 
-## Впишем доп.папку для коммитов (эта папка по-умолчанию не включена в список для коммита)
+## Enter an additional folder for commits (this folder is not included in the list for commits by default)
 ```
 lbu include /etc/init.d/
 ```
 
-## Переводим системный сервис ACF с порта 443 на порт 444 (чтобы освободить порт 443 для HaProxy)
+## Moving the ACF system service from port 443 to port 444 (to free up port 443 for HaProxy)
 ```
 vi /etc/mini_httpd/mini_httpd.conf
 	I
@@ -199,7 +202,7 @@ vi /etc/mini_httpd/mini_httpd.conf
 rc-service mini_httpd restart
  ```
 
-## Устанавиваем HaProxy и добавляем автозагрузку
+## Install HaProxy and add autoload
 ```
 apk add haproxy
 haproxy version
@@ -208,13 +211,13 @@ rc-service haproxy start
 rc-service haproxy status
 ```
 
-## Устанавливаем certBot
+## Installing certBot
 ```
 apk add certbot
 certbot --version
 ```
 
-## Конфигурируем HaProxy (/etc/haproxy/haproxy.cfg)
+## Configure HaProxy (/etc/haproxy/haproxy.cfg)
 ```
 global
     maxconn 4096
@@ -250,33 +253,33 @@ listen stats
     stats refresh 60
 ```
 
-## Проверяем конфигурационный файл и перезапускаем HaProxy
+## Check the configuration file and restart HaProxy
 ```
 haproxy -c -f /etc/haproxy/haproxy.cfg
 rc-service haproxy reload
 ```
 
-## Создаем первичный сертификат для домена getFirstDozzle.sh (нужно создать папку для объедененного сертификата - mkdir /etc/haproxy/certs)
+## Create a primary certificate for the domain. File youtubedownloader.sh (you need to create a folder for the combined certificate - mkdir /etc/haproxy/certs)
 ```
 #!/bin/sh
 cat /etc/letsencrypt/live/nero-dozzle.duckdns.org/fullchain.pem /etc/letsencrypt/live/nero-dozzle.duckdns.org/privkey.pem > /etc/haproxy/certs/nero-dozzle.duckdns.org.pem
 rc-service haproxy reload
 ```
 
-## Создаем сертификаты
+## We create certificates
 ```
 chmod +x /root/getFirstDozzle.sh
 certbot certonly --standalone --http-01-port 1111 -d nero-dozzle.duckdns.org --post-hook "/root/getFirstDozzle.sh"
 ```
 
-## Создаем скрипт для автоматического перевыпуска всех сертификатов autoCertBot.sh (и делаем его исполняемым chmod +x /root/autoCertBot.sh)
+## Create a script for automatic certificate reissue autoCertBot.sh (and make it executable chmod +x /root/autoCertBot.sh)
 ```
 #!/bin/bash
 LOG_FILE="/root/haproxy_cert_update.log"
 
 CERT_DIR="/etc/letsencrypt/live"
 HAPROXY_CERT_DIR="/etc/haproxy/certs"
-DOMAINS=("nero-dozzle.duckdns.com" "nero-n8n.duckdns.org" "nero-supabase.duckdns.org" "nero-flowise.duckdns.org")
+DOMAINS=("nero-dozzle.duckdns.com")
 
 echo "[$(date)] Starting certificate update..." >> "$LOG_FILE"
 
@@ -301,18 +304,18 @@ fi
 echo "[$(date)] Certificate update process finished." >> "$LOG_FILE"
 ```
 
-## Настриваем крон на проверку каждые 12 часов
+## We set the crown to check every 12 hours
 ```
 crontab -e
 	0 */12 * * * certbot renew --quiet
 ```
 
-## Для сохрания коммита в постоянную память Alpine используем команду
+## To save a commit to Alpine's persistent memory, use the command
 ```
 lbu commit
 ```
 
-## Перезапускаем и перепроверяем
+## Restart and recheck
 ```
 reboot
 ```
