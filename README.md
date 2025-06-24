@@ -1,6 +1,6 @@
 # YouTubeDownloader
 
-# Setting up the server (192.168.8.201)
+# Setting up the server (192.168.8.202)
 
 ## Setting up for the machine
 
@@ -165,7 +165,7 @@ sudo systemctl enable --now youtubedownloader.service
 systemctl status youtubedownloader.service
 ```
 
-# Setting up a balancer (78.10.22.114)
+# Setting up a balancer (78.10.22.114 - 192.168.8.201)
 The setting is made for the domain:
 ```
 youtubedownloader.by
@@ -240,7 +240,7 @@ frontend https_front
 backend letsencrypt-backend
     server certbot 127.0.0.1:1111
 backend dozzle
-    server server12:8088 192.168.4.117:8088 check
+    server server12:8088 192.168.8.201:2468 check
 backend backend_default
     errorfile 503 /etc/haproxy/errors/503.http
 listen stats
@@ -248,9 +248,14 @@ listen stats
     stats enable
     stats uri /stats
     stats realm HAProxy\ Statistics
-    stats auth admin:password
+    stats auth admin123:pass123
     stats admin if TRUE
     stats refresh 60
+```
+
+## Page for statistics Haroxy (admin123:pass123)
+```
+http://192.168.4.201:8404/stats
 ```
 
 ## Check the configuration file and restart HaProxy
