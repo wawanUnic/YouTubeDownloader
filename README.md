@@ -1,6 +1,6 @@
 # YouTubeDownloader
 
-# Настройка сервера
+# Setting up the server (192.168.8.201)
 
 ## Setting up for the machine
 
@@ -165,7 +165,7 @@ sudo systemctl enable --now youtubedownloader.service
 systemctl status youtubedownloader.service
 ```
 
-# Настройка балансировщика
+# Setting up a balancer (78.10.22.114)
 The setting is made for the domain:
 ```
 youtubedownloader.by
