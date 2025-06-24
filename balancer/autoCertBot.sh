@@ -3,7 +3,7 @@ LOG_FILE="/root/haproxy_cert_update.log"
 
 CERT_DIR="/etc/letsencrypt/live"
 HAPROXY_CERT_DIR="/etc/haproxy/certs"
-DOMAINS=("nero-dozzle.duckdns.com" "nero-n8n.duckdns.org" "nero-supabase.duckdns.org" "nero-flowise.duckdns.org")
+DOMAINS=("youtubedownloader.by")
 
 echo "[$(date)] Starting certificate update..." >> "$LOG_FILE"
 
