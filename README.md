@@ -1,12 +1,12 @@
 # YouTubeDownloader
 
-## Setting up for the server
+## server
 
 - Processor / Memory: Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz (4 cores) / 32GB DDR4 2133 MHz
 - OS / Platform: Ubuntu 24.04.2 LTS / x86_64
 - Storage: SSD 120GB
 
-## Setting up for the balancer
+## balancer
 
 - Processor / Memory - VIA Eden Processor 1000MHz (32bit) / 2GB DDR2
 - AlpineLinux version / Linux kernel version - 3.21.3 / 6.12.13-0-lts
