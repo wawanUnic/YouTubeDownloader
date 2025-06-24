@@ -18,12 +18,13 @@
 
 ## Ports used (server):
 - 22 - SSH - server management. Login only by key
-- 2468 - YouTubeDownloader (web)
+- 2468 - HTTP - YouTubeDownloader
 
 ## Ports used (balancer):
 - 22 - SSH - balancer control. Login only by key
-- 80 - HHTP - web interface (web). Returns permanent redirect to HTTPs
-- 443 - HTTPs - web interface (web).
+- 80 - HHTP - web interface. Returns permanent redirect to HTTPs
+- 443 - HTTPs - web interface.
+- 8404/stats - HTTP - statistics
 
 ## Add a new user
 Working as root
@@ -234,13 +235,13 @@ frontend http_front
     use_backend letsencrypt-backend if letsencrypt-acl
 frontend https_front
     bind *:443 ssl crt /etc/haproxy/certs/
-    acl host_site1 hdr(host) -i nero-dozzle.duckdns.org
-    use_backend dozzle if host_site1
+    acl host_site1 hdr(host) -i youtubedownloader.by
+    use_backend youtubedownloader if host_site1
     default_backend backend_default
 backend letsencrypt-backend
     server certbot 127.0.0.1:1111
-backend dozzle
-    server server12:8088 192.168.8.201:2468 check
+backend youtubedownloader
+    server server:2468 192.168.8.201:2468 check
 backend backend_default
     errorfile 503 /etc/haproxy/errors/503.http
 listen stats
@@ -267,14 +268,14 @@ rc-service haproxy reload
 ## Create a primary certificate for the domain. File youtubedownloader.sh (you need to create a folder for the combined certificate - mkdir /etc/haproxy/certs)
 ```
 #!/bin/sh
-cat /etc/letsencrypt/live/nero-dozzle.duckdns.org/fullchain.pem /etc/letsencrypt/live/nero-dozzle.duckdns.org/privkey.pem > /etc/haproxy/certs/nero-dozzle.duckdns.org.pem
+cat /etc/letsencrypt/live/youtubedownloader.by/fullchain.pem /etc/letsencrypt/live/youtubedownloader.by/privkey.pem > /etc/haproxy/certs/youtubedownloader.by.pem
 rc-service haproxy reload
 ```
 
 ## We create certificates
 ```
-chmod +x /root/getFirstDozzle.sh
-certbot certonly --standalone --http-01-port 1111 -d nero-dozzle.duckdns.org --post-hook "/root/getFirstDozzle.sh"
+chmod +x /root/youtubedownloader.sh
+certbot certonly --standalone --http-01-port 1111 -d youtubedownloader.by --post-hook "/root/youtubedownloader.sh"
 ```
 
 ## Create a script for automatic certificate reissue autoCertBot.sh (and make it executable chmod +x /root/autoCertBot.sh)
@@ -284,7 +285,7 @@ LOG_FILE="/root/haproxy_cert_update.log"
 
 CERT_DIR="/etc/letsencrypt/live"
 HAPROXY_CERT_DIR="/etc/haproxy/certs"
-DOMAINS=("nero-dozzle.duckdns.com")
+DOMAINS=("youtubedownloader.by")
 
 echo "[$(date)] Starting certificate update..." >> "$LOG_FILE"
 
